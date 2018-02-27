@@ -13,13 +13,11 @@ import java.util.*;
 public class RedisSessionManager extends ManagerBase implements Lifecycle {
 
     public int getMaxInactiveInterval() {
-        return this.getContext().getSessionTimeout() * 60;
-    }
-
-    public Container getContainer() {
-        if (this.getContext() != null && this.getContext() instanceof Container)
-            return (Container) this.getContext();
-        return null;
+        Context context = getContext();
+        if (context == null) {
+            return -1;
+        }
+        return context.getSessionTimeout() * 60;
     }
 
     enum SessionPersistPolicy {
@@ -248,7 +246,7 @@ public class RedisSessionManager extends ManagerBase implements Lifecycle {
 
         Boolean attachedToValve = false;
 
-        for (Valve valve : getContainer().getPipeline().getValves()) {
+        for (Valve valve : getContext().getPipeline().getValves()) {
             if (valve instanceof RedisSessionHandlerValve) {
                 this.handlerValve = (RedisSessionHandlerValve) valve;
                 this.handlerValve.setRedisSessionManager(this);
